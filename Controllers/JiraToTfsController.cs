@@ -1,5 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
+using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+using Microsoft.VisualStudio.Services;
+using Microsoft.VisualStudio.Services.WebApi;
+
 namespace JFS.Controllers
 {
     [Route("api/[controller]")]
