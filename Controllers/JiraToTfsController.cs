@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using JFS.Clients;
+using System.Net.Http;
 
 namespace JFS.Controllers
 {
@@ -16,10 +17,11 @@ namespace JFS.Controllers
 
         [HttpGet]
         [Route("[action]")]
-        public string Test()
+        public HttpResponseMessage Test()
         {
             var result = _tfsClient.RetrieveTasks();
-            return "Hello darkness my old friend";
+            //return "Hello darkness my old friend";
+            return result;
         }
     }
 }
