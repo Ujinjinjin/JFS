@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using JFS.Clients.Constants;
@@ -33,7 +34,11 @@ namespace JFS.Clients
             _credentials = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(string.Format("{0}:{1}", "", _personalAccessToken)));
 
             // TODO: Move to "public HttpClient CreateClient()"
-            _client = new HttpClient { BaseAddress = new Uri(_uri) };
+            var handler = new HttpClientHandler();
+            handler.DefaultProxyCredentials = CredentialCache.DefaultCredentials;
+
+            _client = new HttpClient(handler);
+            _client.BaseAddress = new Uri(_uri);
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _credentials);
@@ -41,7 +46,7 @@ namespace JFS.Clients
 
         public HttpResponseMessage RetrieveTasks()
         {
-            HttpResponseMessage response = _client.GetAsync("_apis/projects?stateFilter=All&api-version=1.0").Result;
+            HttpResponseMessage response = _client.GetAsync("_apis/projects?api-version=4.1").Result;
             return response;
         }
     }
