@@ -1,9 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
-using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
-using Microsoft.VisualStudio.Services;
-using Microsoft.VisualStudio.Services.WebApi;
+using JFS.Clients;
 
 namespace JFS.Controllers
 {
@@ -11,11 +7,19 @@ namespace JFS.Controllers
     [ApiController]
     public class JiraToTfsController : ControllerBase
     {
+        private TfsClient _tfsClient;
+
+        public JiraToTfsController()
+        {
+            _tfsClient = new TfsClient();
+        }
+
         [HttpGet]
         [Route("[action]")]
         public string Test()
         {
-            return "Hello darkness my old friend, I've come to talk with you again";
+            var result = _tfsClient.RetrieveTasks();
+            return "Hello darkness my old friend";
         }
     }
 }
