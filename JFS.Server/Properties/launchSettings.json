@@ -1,4 +1,4 @@
-﻿{
+{
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
@@ -17,11 +17,12 @@
     },
     "JFS": {
       "commandName": "Project",
-      "launchBrowser": true,
-      "applicationUrl": "http://localhost:8080",
       "environmentVariables": {
+        "AZURE_DEVOPS_URI": "https://dev.azure.com/kagallad/",
+        "AZURE_DEVOPS_ACCESS_TOKEN": "6ewdv2m7syekpjelouz2qmyg73xctg27wisrc7mnzipenhfvwcoa",
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "applicationUrl": "http://localhost:8080"
     }
   }
 }
