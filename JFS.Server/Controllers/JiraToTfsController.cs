@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using JFS.Clients;
-using System.Net.Http;
+using System.Threading.Tasks;
+using JFS.Clients.TfsClient;
+using System.Collections.Generic;
+using JFS.Models.TFS.WorkItem;
 
 namespace JFS.Controllers
 {
@@ -8,20 +10,36 @@ namespace JFS.Controllers
     [ApiController]
     public class JiraToTfsController : ControllerBase
     {
-        private TfsClient _tfsClient;
-
-        public JiraToTfsController()
+        [HttpPost]
+        [Route("issue/[action]")]
+        public async Task<IActionResult> Create()
         {
-            _tfsClient = new TfsClient();
+            WorkItem workItem = new WorkItem
+            {
+                Title = "Auto Created Work Item from code",
+                AreaPath = "JFS",
+                TeamProject = "JFS",
+                IterationPath = "JFS\\Iteration 1",
+                Priority = 1,
+                Links = new List<Link>
+                {
+                    new Link
+                    {
+                        rel = "System.LinkTypes.Hierarchy-Reverse",
+                        url = "https://dev.azure.com/kagallad/_apis/wit/workItems/2",
+                    }
+                }
+            };
+            var result = await WorkItems.CreateWorkItem(workItem.ToParameterList());
+            return Ok(result);
         }
 
         [HttpGet]
         [Route("[action]")]
-        public HttpResponseMessage Test()
+        public async Task<IActionResult> Test()
         {
-            var result = _tfsClient.RetrieveTasks();
-            //return "Hello darkness my old friend";
-            return result;
+            var result = await WorkItems.TestApi();
+            return Ok(result);
         }
     }
 }
