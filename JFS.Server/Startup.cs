@@ -11,12 +11,17 @@ namespace JFS
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            using (var client = new ApplicationDbContext())
+            {
+                client.Database.EnsureCreated();
+            }
         }
 
         public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddEntityFrameworkSqlite().AddDbContext<ApplicationDbContext>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
