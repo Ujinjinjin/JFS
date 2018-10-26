@@ -45,7 +45,9 @@ namespace JFS.Clients.Constants
                     "One of required environment variables has no value.\n" +
                     "List of required variables:\n" +
                     "   JFS_AZURE_DEVOPS_ACCESS_TOKEN: Azure DevOps or TFS personal access token. Learn how to acquire it https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=vsts \n" +
-                    "   JFS_AZURE_DEVOPS_URI: URI of your Azure DevOps or TFS organization page e.g. 'https://dev.azure.com/{org_name}/'" +
+                    "   JFS_AZURE_DEVOPS_URI: URI of your Azure DevOps or TFS organization page e.g. 'https://dev.azure.com/{org_name}/'\n" +
+                    "   JFS_AZURE_DEVOPS_PROJECT: Id of Azure DevOps or TFS project. (Will be removed soon)\n" +
+                    "   JFS_AZURE_DEVOPS_TEAM: Id of your Azure DevOps or TFS team. (Will be removed soon)\n" +
                     "List of optional variables:\n" +
                     "   JFS_USE_PROXY: if it is true, server will use default system proxy settings. In most cases you don't need this.");
             }
