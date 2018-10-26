@@ -4,22 +4,15 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
-  <!--<PropertyGroup>
-    <AssetTargetFallback>net461</AssetTargetFallback>
-  </PropertyGroup>-->
-
   <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Atlassian.SDK" Version="10.4.0" />
-    <!--<PackageReference Include="Microsoft.AspNet.WebApi" Version="4.0.0.0" />-->
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.1.4" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
-    <!--<PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="15.131.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Services.Client" Version="15.131.1" />-->
   </ItemGroup>
 
 </Project>
