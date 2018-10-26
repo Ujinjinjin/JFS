@@ -23,61 +23,61 @@ namespace JFS
         {
             modelBuilder.Entity<CommonField>(e =>
             {
-                e.Property(cf => cf.Id).HasField("id");
-                e.Property(cf => cf.Name).HasField("name");
-                e.Property(cf => cf.Verbose).HasField("verbose");
+                e.Property(cf => cf.Id).HasColumnName("id");
+                e.Property(cf => cf.Name).HasColumnName("name");
+                e.Property(cf => cf.Verbose).HasColumnName("verbose");
             });
 
             modelBuilder.Entity<Config>(e =>
             {
-                e.Property(conf => conf.Id).HasField("id");
-                e.Property(conf => conf.ProfileId).HasField("profile_id");
-                e.Property(conf => conf.Priority).HasField("priority");
-                e.Property(conf => conf.Sprint).HasField("sprint");
-                e.Property(conf => conf.WorkItemTypeId).HasField("work_item_type_id");
+                e.Property(conf => conf.Id).HasColumnName("id");
+                e.Property(conf => conf.ProfileId).HasColumnName("profile_id");
+                e.Property(conf => conf.Priority).HasColumnName("priority");
+                e.Property(conf => conf.Sprint).HasColumnName("sprint");
+                e.Property(conf => conf.WorkItemTypeId).HasColumnName("work_item_type_id");
             });
 
             modelBuilder.Entity<JiraField>(e =>
             {
-                e.Property(jf => jf.Id).HasField("id");
-                e.Property(jf => jf.Name).HasField("name");
-                e.Property(jf => jf.Verbose).HasField("verbose");
+                e.Property(jf => jf.Id).HasColumnName("id");
+                e.Property(jf => jf.Name).HasColumnName("name");
+                e.Property(jf => jf.Verbose).HasColumnName("verbose");
             });
 
             modelBuilder.Entity<Mapping>(e =>
             {
-                e.Property(m => m.Id).HasField("id");
-                e.Property(m => m.ProfileId).HasField("profile_id");
-                e.Property(m => m.CommonFieldId).HasField("common_field_id");
-                e.Property(m => m.TfsFieldId).HasField("tfs_field_id");
-                e.Property(m => m.JiraFieldId).HasField("jira_field_id");
+                e.Property(m => m.Id).HasColumnName("id");
+                e.Property(m => m.ProfileId).HasColumnName("profile_id");
+                e.Property(m => m.CommonFieldId).HasColumnName("common_field_id");
+                e.Property(m => m.TfsFieldId).HasColumnName("tfs_field_id");
+                e.Property(m => m.JiraFieldId).HasColumnName("jira_field_id");
             });
 
             modelBuilder.Entity<Profile>(e =>
             {
-                e.Property(p => p.Id).HasField("id");
-                e.Property(p => p.Name).HasField("name");
-                e.Property(p => p.Active).HasField("active");
+                e.Property(p => p.Id).HasColumnName("id");
+                e.Property(p => p.Name).HasColumnName("name");
+                e.Property(p => p.Active).HasColumnName("active");
             });
 
             modelBuilder.Entity<Sync>(e =>
             {
-                e.Property(s => s.Id).HasField("id");
-                e.Property(s => s.JiraId).HasField("jira_id");
-                e.Property(s => s.TfsId).HasField("tfs_id");
+                e.Property(s => s.Id).HasColumnName("id");
+                e.Property(s => s.JiraId).HasColumnName("jira_id");
+                e.Property(s => s.TfsId).HasColumnName("tfs_id");
             });
 
             modelBuilder.Entity<TfsField>(e =>
             {
-                e.Property(tf => tf.Id).HasField("id");
-                e.Property(tf => tf.Name).HasField("name");
-                e.Property(tf => tf.Verbose).HasField("verbose");
+                e.Property(tf => tf.Id).HasColumnName("id");
+                e.Property(tf => tf.Name).HasColumnName("name");
+                e.Property(tf => tf.Verbose).HasColumnName("verbose");
             });
 
             modelBuilder.Entity<WorkItemType>(e =>
             {
-                e.Property(wi => wi.Id).HasField("id");
-                e.Property(wi => wi.Type).HasField("type");
+                e.Property(wi => wi.Id).HasColumnName("id");
+                e.Property(wi => wi.Type).HasColumnName("type");
             });
         }
     }
