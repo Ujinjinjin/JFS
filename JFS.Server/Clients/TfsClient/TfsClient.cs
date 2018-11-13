@@ -68,5 +68,13 @@ namespace JFS.Clients.TfsClient
             //response.EnsureSuccessStatusCode();
             return response;
         }
+
+        public async Task<HttpResponseMessage> PatchAsync<T>(string uri, string query, T body, string accept = "application/json-patch+json")
+        {
+            string postBody = JsonConvert.SerializeObject(body);
+            var response = await _httpClient.PatchAsync($"{uri}?{query}", new StringContent(postBody, Encoding.UTF8, accept));
+            //response.EnsureSuccessStatusCode();
+            return response;
+        }
     }
 }

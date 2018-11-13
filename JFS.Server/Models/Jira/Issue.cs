@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace JFS.Models.Jira
+﻿namespace JFS.Models.Jira
 {
     public class Issue
     {
+        public string Id { get; set; }
+        public string Key { get; set; }
+        public IssueFields Fields { get; set; }
     }
 }

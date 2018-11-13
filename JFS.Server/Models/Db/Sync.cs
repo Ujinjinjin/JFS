@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public int JiraId { get; set; }
-        public string TfsId { get; set; }
+        public int TfsId { get; set; }
+        public int Rev { get; set; }
     }
 }
