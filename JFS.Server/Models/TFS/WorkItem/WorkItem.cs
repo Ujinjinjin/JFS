@@ -5,7 +5,8 @@ namespace JFS.Models.TFS.WorkItem
     public class WorkItem
     {
         public string Title { get; set; }
-        public string Description { get; set; }
+        public string ReproSteps { get; set; }
+        public string CreatedDate { get; set; }
         public string AreaPath { get; set; }
         public string TeamProject { get; set; }
         public string IterationPath { get; set; }
@@ -21,6 +22,12 @@ namespace JFS.Models.TFS.WorkItem
                     op = "add",
                     path = "/fields/System.Title",
                     value = Title
+                },
+                new WorkItemParameter
+                {
+                    op = "add",
+                    path = "/fields/Microsoft.VSTS.TCM.ReproSteps", //"/fields/System.Description",
+                    value = $"<div>{ReproSteps.Replace("\n", "</div><div>")}</div>"
                 },
                 new WorkItemParameter
                 {
@@ -48,12 +55,59 @@ namespace JFS.Models.TFS.WorkItem
                 },
             };
 
-            foreach (var link in Links)
+            if (Links != null)
             {
-                parameters.Add(new WorkItemParameter { op = "add", path = "/relations/-", value = link});
+                foreach (var link in Links)
+                {
+                    parameters.Add(new WorkItemParameter { op = "add", path = "/relations/-", value = link });
+                }
             }
 
             return parameters;
         }
+
+        public List<WorkItemParameter> ToParameterListNotEmptyFields(int rev)
+        {
+            List<WorkItemParameter> parameters = new List<WorkItemParameter>();
+
+            if (!(string.IsNullOrWhiteSpace(Title) || string.IsNullOrEmpty(Title)))
+            {
+                parameters.Add(new WorkItemParameter
+                {
+                    op = "add",
+                    path = "/fields/System.Title",
+                    value = Title
+                });
+            }
+
+            if (!(string.IsNullOrWhiteSpace(ReproSteps) || string.IsNullOrEmpty(ReproSteps)))
+            {
+                parameters.Add(new WorkItemParameter
+                {
+                    op = "add",
+                    path = "/fields/Microsoft.VSTS.TCM.ReproSteps",
+                    value = $"<div>{ReproSteps.Replace("\n", "</div><div>")}</div>"
+                });
+            }
+
+            parameters.Add(new WorkItemParameter
+            {
+                op = "test",
+                path = "/rev",
+                value = rev
+            });
+
+            if (Links != null)
+            {
+                foreach (var link in Links)
+                {
+                    parameters.Add(new WorkItemParameter { op = "add", path = "/relations/-", value = link });
+                }
+            }
+
+            return parameters;
+        }
+
+
     }
 }
