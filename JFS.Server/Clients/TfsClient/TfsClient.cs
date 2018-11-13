@@ -21,7 +21,7 @@ namespace JFS.Clients.TfsClient
         public TfsClient()
         {
             Env.InitEnvs();
-            _credentials = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(string.Format("{0}:{1}", "", Env.JFS_ACCESS_TOKEN)));
+            _credentials = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(string.Format("{0}:{1}", "", Env.TFS_ACCESS_TOKEN)));
             _httpClient = CreateClient(_credentials);
         }
 
@@ -44,7 +44,7 @@ namespace JFS.Clients.TfsClient
                 client = new HttpClient();
             }
 
-            client.BaseAddress = new Uri(Env.JFS_URI);
+            client.BaseAddress = new Uri(Env.TFS_URI);
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
