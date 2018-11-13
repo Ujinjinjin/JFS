@@ -1,32 +1,35 @@
 CREATE TABLE CommonField (
-    id   INTEGER CONSTRAINT pk_common_field PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
-    verbose TEXT NULL
+    id      INTEGER CONSTRAINT pk_common_field PRIMARY KEY AUTOINCREMENT,
+    name    TEXT UNIQUE NOT NULL,
+    verbose TEXT        NULL
 );
 
 CREATE TABLE JiraField (
-    id   INTEGER CONSTRAINT pk_jira_field PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
-    verbose TEXT NOT NULL
+    id      INTEGER CONSTRAINT pk_jira_field PRIMARY KEY AUTOINCREMENT,
+    name    TEXT UNIQUE NOT NULL,
+    verbose TEXT        NOT NULL
 );
 
 CREATE TABLE Profile (
-    id   INTEGER CONSTRAINT pk_profile PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
-    active BOOLEAN NOT NULL
+    id     INTEGER CONSTRAINT pk_profile PRIMARY KEY AUTOINCREMENT,
+    name   TEXT UNIQUE NOT NULL,
+    active BOOLEAN     NOT NULL
 );
 
 CREATE TABLE Sync (
     id      INTEGER CONSTRAINT pk_sync PRIMARY KEY AUTOINCREMENT,
-    jira_id INTEGER UNIQUE,
-    tfs_id  INTEGER UNIQUE,
-    rev INTEGER
+    jira_id INTEGER,
+    tfs_id  INTEGER,
+    rev     INTEGER,
+    deleted BOOLEAN                                DEFAULT FALSE,
+    UNIQUE (jira_id, tfs_id)
+        ON CONFLICT FAIL
 );
 
 CREATE TABLE TfsField (
-    id   INTEGER CONSTRAINT pk_tfs_field PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
-    verbose TEXT NOT NULL
+    id      INTEGER CONSTRAINT pk_tfs_field PRIMARY KEY AUTOINCREMENT,
+    name    TEXT UNIQUE NOT NULL,
+    verbose TEXT        NOT NULL
 );
 
 CREATE TABLE Mapping (
@@ -51,23 +54,33 @@ CREATE INDEX idx_mapping__profile
 CREATE INDEX idx_mapping__tfs_fields
     ON Mapping (tfs_field_id);
 
-CREATE TABLE WorkItemType (
-    id   INTEGER CONSTRAINT pk_work_item_type PRIMARY KEY AUTOINCREMENT,
-    type TEXT UNIQUE NOT NULL
+CREATE TABLE TfsConfig (
+    id           INTEGER CONSTRAINT pk_tfs_config PRIMARY KEY AUTOINCREMENT,
+    priority     INTEGER NOT NULL,
+    parent_id    INTEGER NOT NULL,
+    sprint       TEXT    NOT NULL,
+    area         TEXT    NOT NULL,
+    team_project TEXT    NOT NULL
+);
+
+CREATE TABLE JiraConfig (
+    id       INTEGER CONSTRAINT pk_jira_config PRIMARY KEY AUTOINCREMENT,
+    priority TEXT NOT NULL,
+    sprint   TEXT NOT NULL
 );
 
 CREATE TABLE Config (
-    id                INTEGER CONSTRAINT pk_config PRIMARY KEY AUTOINCREMENT,
-    profile_id        INTEGER NOT NULL REFERENCES Profile (id),
-    priority          INTEGER,
-    sprint            TEXT    NOT NULL,
-    work_item_type_id INTEGER NOT NULL REFERENCES WorkItemType (id),
-    UNIQUE (work_item_type_id, priority)
-        ON CONFLICT FAIL
+    id          INTEGER CONSTRAINT pk_config PRIMARY KEY AUTOINCREMENT,
+    tfs_config_id  INTEGER        NOT NULL REFERENCES TfsConfig (id),
+    jira_config_id INTEGER        NOT NULL REFERENCES JiraConfig (id),
+    profile_id     INTEGER UNIQUE NOT NULL REFERENCES Profile (id)
 );
 
-CREATE INDEX idx_config__profile
-    ON Config (profile_id);
+CREATE INDEX idx_config__jira_config
+    ON config (jira_config_id);
 
-CREATE INDEX idx_config__work_item_type
-    ON Config (work_item_type_id)
+CREATE INDEX idx_config__profile
+    ON config (profile_id);
+
+CREATE INDEX idx_config__tfs_config
+    ON config (tfs_config_id);
