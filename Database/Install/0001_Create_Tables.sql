@@ -19,7 +19,8 @@ CREATE TABLE Profile (
 CREATE TABLE Sync (
     id      INTEGER CONSTRAINT pk_sync PRIMARY KEY AUTOINCREMENT,
     jira_id INTEGER UNIQUE,
-    tfs_id  TEXT UNIQUE
+    tfs_id  INTEGER UNIQUE,
+    rev INTEGER
 );
 
 CREATE TABLE TfsField (
