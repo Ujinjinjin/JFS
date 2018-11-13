@@ -6,6 +6,7 @@ using JFS.Models.TFS.WorkItem;
 using JFS.Models.Jira;
 using JFS.Models.Db;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace JFS.Controllers
 {
@@ -20,38 +21,44 @@ namespace JFS.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Catch Jira hook and create similar work item in Azure DevOps (VSTS/TFS)
+        /// </summary>
         [HttpPost]
         [Route("issue/[action]")]
         public async Task<IActionResult> Create([FromBody] JiraHook hook)
         {
-            Sync checkSync = _context.Sync.FirstOrDefault(s => s.JiraId == int.Parse(hook.Issue.Id));
+            // Get configs
+            Config config = Config.GetConfig(_context);
+            // Validate
+            Sync sync = _context.Sync.FirstOrDefault(s => s.JiraId == int.Parse(hook.Issue.Id));
 
-            if (checkSync != null)
-                return Ok("Already exist");
-
+            if (sync != null || config.JiraConfig.Priority != hook.Issue.Fields.Priority)
+                return Ok("Can't create issue");
+            // Create
             WorkItem workItem = new WorkItem
             {
                 Title = hook.Issue.Fields.Summary,
-                ReproSteps = hook.Issue.Fields.Description, // $"{hook.Issue.Fields.Description}\n\nOpend At: {hook.Issue.Fields.Created}\nBy: {hook.User.DisplayName}\nEmail: {hook.User.EmailAddress}",
+                ReproSteps = $"{hook.Issue.Fields.Description}\n \nOpend At: {hook.Issue.Fields.Created}\nBy: {hook.User.DisplayName}\nEmail: {hook.User.EmailAddress}",
                 CreatedDate = hook.Issue.Fields.Created,
-                AreaPath = "JFS",  // From config
-                TeamProject = "JFS",  // From config
-                IterationPath = "JFS\\Iteration 1", // From config
-                Priority = 1,  // From mapping
+                AreaPath = config.TfsConfig.Area,
+                TeamProject = config.TfsConfig.TeamProject,
+                IterationPath = config.TfsConfig.Iteration,
+                Priority = Mapper.JiraPriorityToTfs(hook.Issue.Fields.Priority),
                 Links = new List<Link>
                 {
                     new Link
                     {
-                        rel = "System.LinkTypes.Hierarchy-Reverse",  // From config
-                        url = "https://dev.azure.com/kagallad/_apis/wit/workItems/2",
+                        rel = "System.LinkTypes.Hierarchy-Reverse",
+                        url = $"https://dev.azure.com/kagallad/_apis/wit/workItems/{config.TfsConfig.ParentId}",
                     }
                 }
             };
             var result = await WorkItems.CreateBug(workItem.ToParameterList());
 
-            BlankWI TfsResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<BlankWI>(result);  // Do beatifull
-
-            Sync sync = new Sync
+            Blank TfsResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Blank>(result);  // Do beatifull
+            // Create new sync record
+            sync = new Sync
             {
                 JiraId = int.Parse(hook.Issue.Id),
                 TfsId = TfsResponse.Id,
@@ -68,13 +75,14 @@ namespace JFS.Controllers
         [Route("issue/[action]")]
         public async Task<IActionResult> Update([FromBody] JiraHook hook)
         {
+            // Get configs
+            Config config = Config.GetConfig(_context);
+            // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.JiraId == int.Parse(hook.Issue.Id));
 
-            if (sync == null)
-                return Ok("Not found");
-
-            int tfsId = sync.TfsId;
-
+            if (sync == null || sync.Deleted || config.JiraConfig.Priority != hook.Issue.Fields.Priority)
+                return Ok($"Not found. Deleted: {sync.Deleted}");
+            // Update
             WorkItem workItem = new WorkItem();
 
             foreach (var changelogItem in hook.ChangeLog.Items)
@@ -90,7 +98,7 @@ namespace JFS.Controllers
                 }
             }
 
-            var result = await WorkItems.UpdateBug(workItem.ToParameterListNotEmptyFields(sync.Rev), tfsId);
+            var result = await WorkItems.UpdateBug(workItem.ToParameterListNotEmptyFields(sync.Rev), sync.TfsId);
 
             sync.Rev += 1;
             await _context.SaveChangesAsync();
@@ -98,12 +106,19 @@ namespace JFS.Controllers
             return Ok(result);
         }
 
-        [HttpGet]
-        [Route("[action]")]
-        public async Task<IActionResult> Test()
+        [HttpPost]
+        [Route("issue/[action]")]
+        public async Task<IActionResult> Delete([FromBody] JiraHook hook)
         {
-            var result = await WorkItems.TestApi();
-            return Ok(result);
+            Sync sync = _context.Sync.FirstOrDefault(s => s.JiraId == int.Parse(hook.Issue.Id));
+
+            if (sync == null || sync.Deleted)
+                return Ok($"Not found. Deleted: {sync.Deleted}");
+
+            sync.Deleted = true;
+            await _context.SaveChangesAsync();
+
+            return Ok("Deleted");
         }
     }
 }

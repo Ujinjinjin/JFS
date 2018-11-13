@@ -1,6 +1,6 @@
 ﻿namespace JFS.Models.TFS.WorkItem
 {
-    public class BlankWI
+    public class Blank
     {
         public int Id { get; set; }
     }
