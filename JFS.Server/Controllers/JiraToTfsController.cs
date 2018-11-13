@@ -6,7 +6,7 @@ using JFS.Models.TFS.WorkItem;
 using JFS.Models.Jira;
 using JFS.Models.Db;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
+using JFS.Clients.Constants;
 
 namespace JFS.Controllers
 {
@@ -19,6 +19,7 @@ namespace JFS.Controllers
         public JiraToTfsController(ApplicationDbContext context)
         {
             _context = context;
+            Env.InitEnvs();
         }
 
         /// <summary>
@@ -50,11 +51,11 @@ namespace JFS.Controllers
                     new Link
                     {
                         rel = "System.LinkTypes.Hierarchy-Reverse",
-                        url = $"https://dev.azure.com/kagallad/_apis/wit/workItems/{config.TfsConfig.ParentId}",
+                        url = $"{Env.TFS_URI}_apis/wit/workItems/{config.TfsConfig.ParentId}",
                     }
                 }
             };
-            var result = await WorkItems.CreateBug(workItem.ToParameterList());
+            var result = await WorkItems.CreateBug(workItem.ToParameterList(), config);
 
             Blank TfsResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Blank>(result);  // Do beatifull
             // Create new sync record
@@ -98,7 +99,7 @@ namespace JFS.Controllers
                 }
             }
 
-            var result = await WorkItems.UpdateBug(workItem.ToParameterListNotEmptyFields(sync.Rev), sync.TfsId);
+            var result = await WorkItems.UpdateBug(workItem.ToParameterListNotEmptyFields(sync.Rev), config, sync.TfsId);
 
             sync.Rev += 1;
             await _context.SaveChangesAsync();

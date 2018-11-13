@@ -1,4 +1,5 @@
 ﻿using JFS.Clients.Constants;
+using JFS.Models.Db;
 using JFS.Models.TFS.WorkItem;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -10,16 +11,16 @@ namespace JFS.Clients.TfsClient
     {
         private static TfsClient _client = new TfsClient();
 
-        public static async Task<string> CreateBug(List<WorkItemParameter> parameters)
+        public static async Task<string> CreateBug(List<WorkItemParameter> parameters, Config config)
         {
-            HttpResponseMessage response = await _client.PostAsync($"{Env.JFS_PROJECT}/_apis/wit/workitems/$Bug", "api-version=4.1", parameters);
+            HttpResponseMessage response = await _client.PostAsync($"{config.TfsConfig.TeamProject}/_apis/wit/workitems/$Bug", "api-version=4.1", parameters);
             string responseBody = await response.Content.ReadAsStringAsync();
             return responseBody;
         }
 
-        public static async Task<string> UpdateBug(List<WorkItemParameter> parameters, int id)
+        public static async Task<string> UpdateBug(List<WorkItemParameter> parameters, Config config, int id)
         {
-            HttpResponseMessage response = await _client.PatchAsync($"{Env.JFS_PROJECT}/_apis/wit/workitems/{id}", "api-version=4.1", parameters);
+            HttpResponseMessage response = await _client.PatchAsync($"{config.TfsConfig.TeamProject}/_apis/wit/workitems/{id}", "api-version=4.1", parameters);
             string responseBody = await response.Content.ReadAsStringAsync();
             return responseBody;
         }
