@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace JFS.Models.Requests.TFS
 {
-    public class TfsHook<T>
+    public class Changes
     {
-        public string EventType { get; set; }
-        public T Resource { get; set; }
+        public string OldValue { get; set; }
+        public string NewValue { get; set; }
     }
 }

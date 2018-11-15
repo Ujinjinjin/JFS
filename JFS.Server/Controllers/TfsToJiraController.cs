@@ -28,29 +28,76 @@ namespace JFS.Controllers
 
         [HttpPost]
         [Route("issue/[action]")]
-        public async Task<IActionResult> Create([FromBody] TfsHook hook)
+        public async Task<IActionResult> Create([FromBody] TfsHook<Resource> hook)
         {
+            // Get configs
+            Config config = Config.GetConfig(_context);
+            // Validate
+            Sync sync = _context.Sync.FirstOrDefault(s => s.TfsId == hook.Resource.Id);
+
+            if (sync != null) // || config.TfsConfig.Priority != 1)
+                return Ok("Can't create issue");
+
             var issue = _jira.CreateIssue("JFS");
             issue.Type = hook.Resource.Fields.WorkItemType;
-            issue.Priority = Mapper.TfsPriorityToJira(1);  // TODO: Retrieve priority from tfs server
+            issue.Priority = Mapper.TfsPriorityToJira(1);  // TODO: Retrieve priority and description from tfs server
             issue.Summary = hook.Resource.Fields.Title;
 
             var result = await issue.SaveChangesAsync();
+
+            // Create new sync record
+            sync = new Sync
+            {
+                JiraKey = result.Key.Value,
+                TfsId = hook.Resource.Id,
+                Rev = hook.Resource.Rev
+            };
+
+            await _context.AddAsync(sync);
+            await _context.SaveChangesAsync();
+
             return Ok(result);
         }
 
         [HttpPost]
         [Route("issue/[action]")]
-        public async Task<IActionResult> Update([FromBody] TfsHook hook)
+        public async Task<IActionResult> Update([FromBody] TfsHook<UpdatedResource> hook)
         {
-            return Ok();
+            // Get configs
+            Config config = Config.GetConfig(_context);
+            // Validate
+            Sync sync = _context.Sync.FirstOrDefault(s => s.TfsId == hook.Resource.Revision.Id);
+
+            if (sync == null || sync.Deleted) // || config.TfsConfig.Priority != 1)
+                return Ok($"Not found. Deleted: {sync.Deleted}");
+            // Update
+            var issue = await _jira.Issues.GetIssueAsync(sync.JiraKey);
+
+            issue.Summary = hook.Resource.Fields.Title != null ? hook.Resource.Fields.Title.NewValue : issue.Summary;
+            issue.Description = hook.Resource.Fields.ReproSteps != null ? hook.Resource.Fields.ReproSteps.NewValue : issue.Description;
+
+            var result = await issue.SaveChangesAsync();
+
+            sync.Rev = hook.Resource.Revision.Rev;
+
+            await _context.SaveChangesAsync();
+            
+            return Ok(result);
         }
 
         [HttpPost]
         [Route("issue/[action]")]
-        public async Task<IActionResult> Delete([FromBody] TfsHook hook)
+        public async Task<IActionResult> Delete([FromBody] TfsHook<Resource> hook)
         {
-            return Ok();
+            Sync sync = _context.Sync.FirstOrDefault(s => s.TfsId == hook.Resource.Id);
+
+            if (sync == null || sync.Deleted)
+                return Ok($"Not found. Deleted: {sync.Deleted}");
+
+            sync.Deleted = true;
+            await _context.SaveChangesAsync();
+
+            return Ok("Deleted");
         }
     }
 }

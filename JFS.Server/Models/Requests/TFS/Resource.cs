@@ -9,6 +9,6 @@ namespace JFS.Models.Requests.TFS
     {
         public int Id { get; set; }
         public int Rev { get; set; }
-        public Fields Fields { get; set; }
+        public Fields<string> Fields { get; set; }
     }
 }

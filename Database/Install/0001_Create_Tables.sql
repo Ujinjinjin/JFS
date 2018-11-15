@@ -17,12 +17,12 @@ CREATE TABLE Profile (
 );
 
 CREATE TABLE Sync (
-    id      INTEGER CONSTRAINT pk_sync PRIMARY KEY AUTOINCREMENT,
-    jira_id INTEGER,
-    tfs_id  INTEGER,
-    rev     INTEGER,
-    deleted BOOLEAN                                DEFAULT FALSE,
-    UNIQUE (jira_id, tfs_id)
+    id       INTEGER CONSTRAINT pk_sync PRIMARY KEY AUTOINCREMENT,
+    jira_key TEXT    NOT NULL,
+    tfs_id   INTEGER NOT NULL,
+    rev      INTEGER NOT NULL,
+    deleted  BOOLEAN                                DEFAULT FALSE,
+    UNIQUE (jira_key, tfs_id)
         ON CONFLICT FAIL
 );
 
@@ -70,7 +70,7 @@ CREATE TABLE JiraConfig (
 );
 
 CREATE TABLE Config (
-    id          INTEGER CONSTRAINT pk_config PRIMARY KEY AUTOINCREMENT,
+    id             INTEGER CONSTRAINT pk_config PRIMARY KEY AUTOINCREMENT,
     tfs_config_id  INTEGER        NOT NULL REFERENCES TfsConfig (id),
     jira_config_id INTEGER        NOT NULL REFERENCES JiraConfig (id),
     profile_id     INTEGER UNIQUE NOT NULL REFERENCES Profile (id)

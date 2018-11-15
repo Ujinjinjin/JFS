@@ -80,7 +80,7 @@ namespace JFS
             modelBuilder.Entity<Sync>(e =>
             {
                 e.Property(s => s.Id).HasColumnName("id");
-                e.Property(s => s.JiraId).HasColumnName("jira_id");
+                e.Property(s => s.JiraKey).HasColumnName("jira_key");
                 e.Property(s => s.TfsId).HasColumnName("tfs_id");
                 e.Property(s => s.Rev).HasColumnName("rev");
                 e.Property(s => s.Deleted).HasColumnName("deleted");

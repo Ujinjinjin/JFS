@@ -7,18 +7,21 @@ using System.Threading.Tasks;
 
 namespace JFS.Models.Requests.TFS
 {
-    public class Fields
+    public class Fields<T>
     {
         [JsonProperty(PropertyName = "System.WorkItemType")]
-        public string WorkItemType { get; set; }
+        public T WorkItemType { get; set; }
 
         [JsonProperty(PropertyName = "System.State")]
-        public string State { get; set; }
+        public T State { get; set; }
 
         [JsonProperty(PropertyName = "System.CreatedBy")]
-        public string CreatedBy { get; set; }
+        public T CreatedBy { get; set; }
 
         [JsonProperty(PropertyName = "System.Title")]
-        public string Title { get; set; }
+        public T Title { get; set; }
+
+        [JsonProperty(PropertyName = "Microsoft.VSTS.TCM.ReproSteps")]
+        public T ReproSteps { get; set; }
     }
 }
