@@ -4,13 +4,12 @@
     "anonymousAuthentication": true,
     "iisExpress": {
       "applicationUrl": "http://localhost:22676",
-      "sslPort": 44339
+      "sslPort": 0
     }
   },
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",
-      "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -18,9 +17,15 @@
     "JFS": {
       "commandName": "Project",
       "environmentVariables": {
-        "AZURE_DEVOPS_URI": "https://dev.azure.com/kagallad/",
-        "AZURE_DEVOPS_ACCESS_TOKEN": "6ewdv2m7syekpjelouz2qmyg73xctg27wisrc7mnzipenhfvwcoa",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "JFS_JIRA_PASSWORD": "",
+        "JFS_AZURE_DEVOPS_TEAM": "",
+        "JFS_AZURE_DEVOPS_ACCESS_TOKEN": "",
+        "JFS_JIRA_SERVER_URI": "",
+        "JFS_AZURE_DEVOPS_URI": "",
+        "JFS_AZURE_DEVOPS_PROJECT": "",
+        "JFS_USE_PROXY": "",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "JFS_JIRA_USER": ""
       },
       "applicationUrl": "http://localhost:8080"
     }

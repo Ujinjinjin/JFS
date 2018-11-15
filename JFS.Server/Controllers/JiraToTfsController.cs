@@ -55,7 +55,7 @@ namespace JFS.Controllers
                     }
                 }
             };
-            var result = await WorkItems.CreateBug(workItem.ToParameterList(), config);
+            var result = await WorkItems.CreateBug(workItem.ToParameterList(), config);  // TODO: Check if successeeded
 
             Blank TfsResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Blank>(result);  // Do beatifull
             // Create new sync record
@@ -99,7 +99,7 @@ namespace JFS.Controllers
                 }
             }
 
-            var result = await WorkItems.UpdateBug(workItem.ToParameterListNotEmptyFields(sync.Rev), config, sync.TfsId);
+            var result = await WorkItems.UpdateBug(workItem.ToParameterListNotEmptyFields(sync.Rev), config, sync.TfsId);  // TODO: Check if successeeded
 
             sync.Rev += 1;
             await _context.SaveChangesAsync();
