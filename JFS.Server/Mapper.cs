@@ -11,12 +11,25 @@ namespace JFS
         {
             switch (priority)
             {
-                case "Minor":
-                    return 1;
                 case "Major":
+                    return 1;
+                case "Minor":
                     return 2;
                 default:
                     return 1;
+            }
+        }
+
+        public static string TfsPriorityToJira(int priority)
+        {
+            switch (priority)
+            {
+                case 1:
+                    return "Major";
+                case 2:
+                    return "Minor";
+                default:
+                    return "Major";
             }
         }
     }
