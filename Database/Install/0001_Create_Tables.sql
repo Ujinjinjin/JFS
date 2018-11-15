@@ -66,7 +66,8 @@ CREATE TABLE TfsConfig (
 CREATE TABLE JiraConfig (
     id       INTEGER CONSTRAINT pk_jira_config PRIMARY KEY AUTOINCREMENT,
     priority TEXT NOT NULL,
-    sprint   TEXT NOT NULL
+    sprint   TEXT NOT NULL,
+    project  TEXT NOT NULL
 );
 
 CREATE TABLE Config (
