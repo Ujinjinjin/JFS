@@ -1,14 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using JFS.Clients.TfsClient;
-using System.Collections.Generic;
-using JFS.Models.TFS.WorkItem;
-using JFS.Models.Jira;
 using JFS.Models.Db;
 using System.Linq;
 using JFS.Clients.Constants;
 using JFS.Models.Requests.TFS;
 using Atlassian.Jira;
+using System.Net;
 
 namespace JFS.Controllers
 {
