@@ -7,6 +7,7 @@ using JFS.Models.Jira;
 using JFS.Models.Db;
 using System.Linq;
 using JFS.Clients.Constants;
+using JFS.Models.Requests.TFS;
 
 namespace JFS.Controllers
 {
@@ -32,7 +33,7 @@ namespace JFS.Controllers
             // Get configs
             Config config = Config.GetConfig(_context);
             // Validate
-            Sync sync = _context.Sync.FirstOrDefault(s => s.JiraId == int.Parse(hook.Issue.Id));
+            Sync sync = _context.Sync.FirstOrDefault(s => s.JiraKey == hook.Issue.Key);
 
             if (sync != null || config.JiraConfig.Priority != hook.Issue.Fields.Priority)
                 return Ok("Can't create issue");
@@ -57,13 +58,13 @@ namespace JFS.Controllers
             };
             var result = await WorkItems.CreateBug(workItem.ToParameterList(), config);  // TODO: Check if successeeded
 
-            Blank TfsResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Blank>(result);  // Do beatifull
+            Resource TfsResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Resource>(result);
             // Create new sync record
             sync = new Sync
             {
-                JiraId = int.Parse(hook.Issue.Id),
+                JiraKey = hook.Issue.Key,
                 TfsId = TfsResponse.Id,
-                Rev = 1
+                Rev = TfsResponse.Rev
             };
 
             await _context.AddAsync(sync);
@@ -79,7 +80,7 @@ namespace JFS.Controllers
             // Get configs
             Config config = Config.GetConfig(_context);
             // Validate
-            Sync sync = _context.Sync.FirstOrDefault(s => s.JiraId == int.Parse(hook.Issue.Id));
+            Sync sync = _context.Sync.FirstOrDefault(s => s.JiraKey == hook.Issue.Key);
 
             if (sync == null || sync.Deleted || config.JiraConfig.Priority != hook.Issue.Fields.Priority)
                 return Ok($"Not found. Deleted: {sync.Deleted}");
@@ -101,7 +102,9 @@ namespace JFS.Controllers
 
             var result = await WorkItems.UpdateBug(workItem.ToParameterListNotEmptyFields(sync.Rev), config, sync.TfsId);  // TODO: Check if successeeded
 
-            sync.Rev += 1;
+            Resource TfsResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Resource>(result);
+
+            sync.Rev = TfsResponse.Rev;
             await _context.SaveChangesAsync();
 
             return Ok(result);
@@ -111,7 +114,7 @@ namespace JFS.Controllers
         [Route("issue/[action]")]
         public async Task<IActionResult> Delete([FromBody] JiraHook hook)
         {
-            Sync sync = _context.Sync.FirstOrDefault(s => s.JiraId == int.Parse(hook.Issue.Id));
+            Sync sync = _context.Sync.FirstOrDefault(s => s.JiraKey == hook.Issue.Key);
 
             if (sync == null || sync.Deleted)
                 return Ok($"Not found. Deleted: {sync.Deleted}");

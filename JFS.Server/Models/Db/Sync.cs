@@ -3,7 +3,7 @@
     public class Sync
     {
         public int Id { get; set; }
-        public int JiraId { get; set; }
+        public string JiraKey { get; set; }
         public int TfsId { get; set; }
         public int Rev { get; set; }
         public bool Deleted { get; set; }
