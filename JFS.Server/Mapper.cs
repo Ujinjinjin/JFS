@@ -25,11 +25,11 @@ namespace JFS
             switch (priority)
             {
                 case 1:
-                    return "Major";
+                    return "Highest";
                 case 2:
-                    return "Minor";
+                    return "High";
                 default:
-                    return "Major";
+                    return "Highest";
             }
         }
     }
