@@ -64,7 +64,7 @@ namespace JFS.Controllers
         public async Task<IActionResult> Update([FromBody] TfsHook<UpdatedResource> hook)
         {
             // Get configs
-            Config config = Config.GetConfig(_context);
+            Config config = Config.GetConfig(_context, 1);
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.TfsId == hook.Resource.Revision.Id);
 
