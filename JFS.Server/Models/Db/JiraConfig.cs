@@ -5,5 +5,6 @@
         public int Id { get; set; }
         public string Priority { get; set; }
         public string Sprint { get; set; }
+        public string Project { get; set; }
     }
 }

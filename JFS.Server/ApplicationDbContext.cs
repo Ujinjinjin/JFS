@@ -42,6 +42,7 @@ namespace JFS
                 e.Property(conf => conf.Id).HasColumnName("id");
                 e.Property(conf => conf.Priority).HasColumnName("priority");
                 e.Property(conf => conf.Sprint).HasColumnName("sprint");
+                e.Property(conf => conf.Project).HasColumnName("project");
             });
 
             modelBuilder.Entity<Profile>(e =>
