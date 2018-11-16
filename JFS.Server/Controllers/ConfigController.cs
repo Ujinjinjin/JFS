@@ -14,13 +14,5 @@ namespace JFS.Controllers
         {
             _context = context;
         }
-
-        [HttpGet]
-        [Route("[action]")]
-        public object GetFields()
-        {
-            var fields = _context.CommonField.ToList();
-            return fields;
-        }
     }
 }
