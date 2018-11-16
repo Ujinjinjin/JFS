@@ -31,11 +31,11 @@ namespace JFS.Controllers
         public async Task<IActionResult> Create([FromBody] JiraHook hook)
         {
             // Get configs
-            Config config = Config.GetConfig(_context);
+            Config config = Config.GetConfig(_context, hook.Issue.Fields.Priority);
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.JiraKey == hook.Issue.Key);
 
-            if (sync != null || config.JiraConfig.Priority != hook.Issue.Fields.Priority)
+            if (config == null || sync != null)
                 return Ok("Can't create issue");
             // Create
             WorkItem workItem = new WorkItem
@@ -78,11 +78,11 @@ namespace JFS.Controllers
         public async Task<IActionResult> Update([FromBody] JiraHook hook)
         {
             // Get configs
-            Config config = Config.GetConfig(_context);
+            Config config = Config.GetConfig(_context, hook.Issue.Fields.Priority);
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.JiraKey == hook.Issue.Key);
 
-            if (sync == null || sync.Deleted || config.JiraConfig.Priority != hook.Issue.Fields.Priority)
+            if (config == null || sync == null || sync.Deleted)
                 return Ok($"Not found. Deleted: {sync.Deleted}");
             // Update
             WorkItem workItem = new WorkItem();
