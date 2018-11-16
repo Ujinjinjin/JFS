@@ -9,3 +9,10 @@ values ('Minor', 'Nice', 'JFS');
 
 insert into Config (tfs_config_id, jira_config_id, profile_id)
 values (1, 1, 1);
+
+insert into Priority (tfs_priority, jira_priority)
+values (1, 'Highest'),
+       (2, 'High'),
+       (3, 'Medium'),
+       (4, 'Low'),
+       (5, 'Lowest');

@@ -46,7 +46,7 @@ namespace JFS.Controllers
                 AreaPath = config.TfsConfig.Area,
                 TeamProject = config.TfsConfig.TeamProject,
                 IterationPath = config.TfsConfig.Iteration,
-                Priority = Mapper.JiraPriorityToTfs(hook.Issue.Fields.Priority),
+                Priority = _context.Priority.First(p => p.JiraPriority == hook.Issue.Fields.Priority).TfsPriority,
                 Links = new List<Link>
                 {
                     new Link

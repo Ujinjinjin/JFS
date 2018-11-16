@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using JFS.Models.Db;
 using System.Linq;
@@ -21,6 +21,8 @@ namespace JFS.Controllers
             _context = context;
             Env.InitEnvs();
             _jira = Jira.CreateRestClient(Env.JIRA_SERVER_URI, Env.JIRA_USER, Env.JIRA_PASSWORD);
+            //_jira.RestClient.RestSharpClient.Proxy = WebRequest.GetSystemWebProxy();
+            //_jira.RestClient.RestSharpClient.Proxy.Credentials = CredentialCache.DefaultCredentials;
         }
 
         [HttpPost]
@@ -37,8 +39,9 @@ namespace JFS.Controllers
 
             var issue = _jira.CreateIssue("JFS");
             issue.Type = hook.Resource.Fields.WorkItemType;
-            issue.Priority = Mapper.TfsPriorityToJira(1);  // TODO: Retrieve priority and description from tfs server
+            issue.Priority = _context.Priority.First(p => p.TfsPriority == 1).JiraPriority;  // TODO: Retrieve priority and description from tfs server
             issue.Summary = hook.Resource.Fields.Title;
+            // TODO: Retrieve bug description from TFS
 
             var result = await issue.SaveChangesAsync();
 
