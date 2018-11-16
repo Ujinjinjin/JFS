@@ -31,7 +31,7 @@ namespace JFS.Controllers
         public async Task<IActionResult> Create([FromBody] JiraHook hook)
         {
             // Get configs
-            Config config = Config.GetConfig(_context, hook.Issue.Fields.Priority);
+            Config config = Config.GetConfig(_context, hook.Issue.Fields.Priority.Name);
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.JiraKey == hook.Issue.Key);
 
@@ -46,7 +46,7 @@ namespace JFS.Controllers
                 AreaPath = config.TfsConfig.Area,
                 TeamProject = config.TfsConfig.TeamProject,
                 IterationPath = config.TfsConfig.Iteration,
-                Priority = _context.Priority.First(p => p.JiraPriority == hook.Issue.Fields.Priority).TfsPriority,
+                Priority = _context.Priority.First(p => p.JiraPriority == hook.Issue.Fields.Priority.Name).TfsPriority,
                 Links = new List<Link>
                 {
                     new Link
@@ -78,7 +78,7 @@ namespace JFS.Controllers
         public async Task<IActionResult> Update([FromBody] JiraHook hook)
         {
             // Get configs
-            Config config = Config.GetConfig(_context, hook.Issue.Fields.Priority);
+            Config config = Config.GetConfig(_context, hook.Issue.Fields.Priority.Name);
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.JiraKey == hook.Issue.Key);
 
