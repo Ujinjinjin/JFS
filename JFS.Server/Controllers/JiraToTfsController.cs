@@ -83,7 +83,7 @@ namespace JFS.Controllers
             Sync sync = _context.Sync.FirstOrDefault(s => s.JiraKey == hook.Issue.Key);
 
             if (config == null || sync == null || sync.Deleted)
-                return Ok($"Not found. Deleted: {sync.Deleted}");
+                return Ok($"Not found");
             // Update
             WorkItem workItem = new WorkItem();
 
@@ -117,7 +117,7 @@ namespace JFS.Controllers
             Sync sync = _context.Sync.FirstOrDefault(s => s.JiraKey == hook.Issue.Key);
 
             if (sync == null || sync.Deleted)
-                return Ok($"Not found. Deleted: {sync.Deleted}");
+                return Ok($"Not found");
 
             sync.Deleted = true;
             await _context.SaveChangesAsync();

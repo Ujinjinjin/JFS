@@ -34,7 +34,7 @@ namespace JFS.Controllers
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.TfsId == hook.Resource.Id);
 
-            if (config == null && sync != null) // || config.TfsConfig.Priority != 1)
+            if (config == null || sync != null) // || config.TfsConfig.Priority != 1)
                 return Ok("Can't create issue");
 
             var issue = _jira.CreateIssue(config.JiraConfig.Project);
