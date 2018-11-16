@@ -30,11 +30,11 @@ namespace JFS.Controllers
         public async Task<IActionResult> Create([FromBody] TfsHook<Resource> hook)
         {
             // Get configs
-            Config config = Config.GetConfig(_context);
+            Config config = Config.GetConfig(_context, 1);
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.TfsId == hook.Resource.Id);
 
-            if (sync != null) // || config.TfsConfig.Priority != 1)
+            if (config == null && sync != null) // || config.TfsConfig.Priority != 1)
                 return Ok("Can't create issue");
 
             var issue = _jira.CreateIssue("JFS");

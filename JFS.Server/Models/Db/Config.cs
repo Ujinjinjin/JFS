@@ -13,12 +13,20 @@ namespace JFS.Models.Db
         public int JiraConfigId { get; set; }
         public JiraConfig JiraConfig { get; set; }
 
-        public static Config GetConfig(ApplicationDbContext context)
+        public static Config GetConfig(ApplicationDbContext context, int tfsPriority)
         {
             return context.Config
                 .Include(c => c.TfsConfig)
                 .Include(c => c.JiraConfig)
-                .First(c => c.Profile.Active);
+                .FirstOrDefault(c => c.Profile.Active && c.TfsConfig.Priority == tfsPriority);
+        }
+
+        public static Config GetConfig(ApplicationDbContext context, string jiraPriority)
+        {
+            return context.Config
+                .Include(c => c.TfsConfig)
+                .Include(c => c.JiraConfig)
+                .FirstOrDefault(c => c.Profile.Active && c.JiraConfig.Priority == jiraPriority);
         }
     }
 }
