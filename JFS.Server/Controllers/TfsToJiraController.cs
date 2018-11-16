@@ -37,7 +37,7 @@ namespace JFS.Controllers
             if (config == null && sync != null) // || config.TfsConfig.Priority != 1)
                 return Ok("Can't create issue");
 
-            var issue = _jira.CreateIssue("JFS");
+            var issue = _jira.CreateIssue(config.JiraConfig.Project);
             issue.Type = hook.Resource.Fields.WorkItemType;
             issue.Priority = _context.Priority.First(p => p.TfsPriority == 1).JiraPriority;  // TODO: Retrieve priority and description from tfs server
             issue.Summary = hook.Resource.Fields.Title;
@@ -69,7 +69,7 @@ namespace JFS.Controllers
             Sync sync = _context.Sync.FirstOrDefault(s => s.TfsId == hook.Resource.Revision.Id);
 
             if (sync == null || sync.Deleted) // || config.TfsConfig.Priority != 1)
-                return Ok($"Not found. Deleted: {sync.Deleted}");
+                return Ok($"Not found");
             // Update
             var issue = await _jira.Issues.GetIssueAsync(sync.JiraKey);
 
@@ -92,7 +92,7 @@ namespace JFS.Controllers
             Sync sync = _context.Sync.FirstOrDefault(s => s.TfsId == hook.Resource.Id);
 
             if (sync == null || sync.Deleted)
-                return Ok($"Not found. Deleted: {sync.Deleted}");
+                return Ok($"Not found");
 
             sync.Deleted = true;
             await _context.SaveChangesAsync();
