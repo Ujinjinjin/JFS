@@ -48,7 +48,7 @@ namespace JFS.Controllers
                 AreaPath = config.TfsConfig.Area,
                 TeamProject = config.TfsConfig.TeamProject,
                 IterationPath = config.TfsConfig.Iteration,
-                Priority = _context.Priority.First(p => p.JiraPriority == hook.Issue.Fields.Priority.Name).TfsPriority,
+                Priority = Priority.ToTfsPriority(_context, hook.Issue.Fields.Priority.Name),
                 Links = new List<Link>
                 {
                     new Link
@@ -61,14 +61,15 @@ namespace JFS.Controllers
             var result = await WorkItems.CreateBug(workItem.ToParameterList(), config);  // TODO: Check if succeeded
 
             Resource tfsResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Resource>(result);
-            // Create new sync record
+            // Sync
             sync = new Sync
             {
                 JiraKey = hook.Issue.Key,
                 TfsId = tfsResponse.Id,
                 Rev = tfsResponse.Rev,
                 Title = workItem.Title,
-                Description = JFStringer.ToCommonFormat(workItem.ReproSteps)
+                Description = JFStringer.ToCommonFormat(workItem.ReproSteps),
+                Priority = workItem.Priority
             };
 
             await _context.AddAsync(sync);
@@ -86,9 +87,10 @@ namespace JFS.Controllers
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.JiraKey == hook.Issue.Key);
 
-            if (config == null || sync == null || sync.Deleted || 
-                (sync.Title == hook.ChangeLog.Items.FirstOrDefault(ch => ch.Field == "summary")?.Tostring && 
-                 sync.Description == JFStringer.ToCommonFormat(hook.ChangeLog.Items.FirstOrDefault(ch => ch.Field == "description")?.Tostring)))
+            if (config == null || sync == null || sync.Deleted ||
+                (sync.Title == hook.ChangeLog.Items.FirstOrDefault(ch => ch.Field == "summary")?.Tostring &&
+                 sync.Description == JFStringer.ToCommonFormat(hook.ChangeLog.Items.FirstOrDefault(ch => ch.Field == "description")?.Tostring) &&
+                 sync.Priority == Priority.ToTfsPriority(_context, hook.ChangeLog.Items.FirstOrDefault(ch => ch.Field == "priority")?.Tostring)))
                 return Ok($"Not found");
             // Update
             WorkItem workItem = new WorkItem();
@@ -99,9 +101,15 @@ namespace JFS.Controllers
                 {
                     case "description":
                         workItem.ReproSteps = JFStringer.ToTfsFormat(changelogItem.Tostring);
+                        sync.Description = changelogItem.Tostring;
                         break;
                     case "summary":
                         workItem.Title = changelogItem.Tostring;
+                        sync.Title = changelogItem.Tostring;
+                        break;
+                    case "priority":
+                        workItem.Priority = Priority.ToTfsPriority(_context, changelogItem.Tostring);
+                        sync.Priority = workItem.Priority;
                         break;
                 }
             }
@@ -110,7 +118,9 @@ namespace JFS.Controllers
 
             Resource tfsResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Resource>(result);
 
+            // Sync
             sync.Rev = tfsResponse.Rev;
+
             await _context.SaveChangesAsync();
 
             return Ok("Updated");

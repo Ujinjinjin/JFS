@@ -90,6 +90,16 @@ namespace JFS.Models.TFS.WorkItem
                 });
             }
 
+            if (Priority != 0)
+            {
+                parameters.Add(new WorkItemParameter
+                {
+                    op = "add",
+                    path = "/fields/Microsoft.VSTS.Common.Priority",
+                    value = Priority
+                });
+            }
+
             parameters.Add(new WorkItemParameter
             {
                 op = "test",
