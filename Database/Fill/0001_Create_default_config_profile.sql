@@ -1,5 +1,5 @@
 insert into Profile (name, active)
-values ('Default Profile', true);
+values ('Default Profile', 1);
 
 insert into TfsConfig (priority, parent_id, sprint, area, team_project)
 values (1, 2, 'JFS\\Iteration 1', 'JFS', 'JFS'),

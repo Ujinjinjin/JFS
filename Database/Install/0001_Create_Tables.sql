@@ -11,13 +11,9 @@ CREATE TABLE Sync (
     rev      INTEGER NOT NULL,
     deleted  BOOLEAN                                DEFAULT FALSE,
     -- Temporary fields, till the better days
-    --     tfs_title  TEXT    NOT NULL,
-    --     jira_title TEXT    NOT NULL,
-    --     tfs_descr  TEXT    NOT NULL,
-    --     jira_descr TEXT    NOT NULL,
-
     title    TEXT    NOT NULL,
     descr    TEXT,
+    priority INTEGER,
 
     UNIQUE (jira_key, tfs_id)
         ON CONFLICT FAIL
