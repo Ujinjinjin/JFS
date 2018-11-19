@@ -18,5 +18,8 @@ namespace JFS.Models.Requests.TFS
 
         [JsonProperty(PropertyName = "Microsoft.VSTS.TCM.ReproSteps")]
         public T ReproSteps { get; set; }
+
+        [JsonProperty(PropertyName = "Microsoft.VSTS.Common.Priority")]
+        public T Priority { get; set; }
     }
 }

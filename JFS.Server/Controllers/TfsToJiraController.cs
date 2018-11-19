@@ -6,6 +6,7 @@ using JFS.Clients.Constants;
 using JFS.Models.Requests.TFS;
 using Atlassian.Jira;
 using System.Net;
+using JFS.Models.TFS.WorkItem;
 
 namespace JFS.Controllers
 {
@@ -31,17 +32,20 @@ namespace JFS.Controllers
         {
             // Get configs
             Config config = Config.GetConfig(_context, 1);
+            //Get workItem
+            Resource workItem = await Clients.TfsClient.WorkItems.GetBug(config, hook.Resource.Id);
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.TfsId == hook.Resource.Id);
 
-            if (config == null || sync != null) // || config.TfsConfig.Priority != 1)
+            if (config == null || sync != null || config.TfsConfig.Priority != int.Parse(workItem.Fields.Priority))
                 return Ok("Can't create issue");
+
 
             var issue = _jira.CreateIssue(config.JiraConfig.Project);
             issue.Type = hook.Resource.Fields.WorkItemType;
-            issue.Priority = _context.Priority.First(p => p.TfsPriority == 1).JiraPriority;  // TODO: Retrieve priority and description from tfs server
+            issue.Priority = _context.Priority.First(p => p.TfsPriority == int.Parse(workItem.Fields.Priority)).JiraPriority;
             issue.Summary = hook.Resource.Fields.Title;
-            // TODO: Retrieve bug description from TFS
+            issue.Description = workItem.Fields.ReproSteps;
 
             var result = await issue.SaveChangesAsync();
 
@@ -50,7 +54,8 @@ namespace JFS.Controllers
             {
                 JiraKey = result.Key.Value,
                 TfsId = hook.Resource.Id,
-                Rev = hook.Resource.Rev
+                Rev = hook.Resource.Rev,
+                Title = hook.Resource.Fields.Title
             };
 
             await _context.AddAsync(sync);
@@ -65,10 +70,12 @@ namespace JFS.Controllers
         {
             // Get configs
             Config config = Config.GetConfig(_context, 1);
+            //Get workItem
+            Resource workItem = await Clients.TfsClient.WorkItems.GetBug(config, hook.Resource.Revision.Id);
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.TfsId == hook.Resource.Revision.Id);
 
-            if (sync == null || sync.Deleted) // || config.TfsConfig.Priority != 1)
+            if (sync == null || sync.Deleted || (sync.Title == hook.Resource.Fields.Title.NewValue)) // || config.TfsConfig.Priority != 1)
                 return Ok($"Not found");
             // Update
             var issue = await _jira.Issues.GetIssueAsync(sync.JiraKey);
@@ -79,6 +86,7 @@ namespace JFS.Controllers
             var result = await issue.SaveChangesAsync();
 
             sync.Rev = hook.Resource.Revision.Rev;
+            sync.Title = hook.Resource.Fields.Title.NewValue;
 
             await _context.SaveChangesAsync();
             
