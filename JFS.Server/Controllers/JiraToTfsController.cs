@@ -4,6 +4,7 @@ using JFS.Models.Db;
 using JFS.Models.Jira;
 using JFS.Models.Requests.TFS;
 using JFS.Models.TFS.WorkItem;
+using JFS.Utils;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +43,7 @@ namespace JFS.Controllers
             WorkItem workItem = new WorkItem
             {
                 Title = hook.Issue.Fields.Summary,
-                ReproSteps = $"{hook.Issue.Fields.Description}", //\n \nOpend At: {hook.Issue.Fields.Created}\nBy: {hook.User.DisplayName}\nEmail: {hook.User.EmailAddress}",
+                ReproSteps = JFStringer.ToTfsFormat(hook.Issue.Fields.Description), //\n \nOpend At: {hook.Issue.Fields.Created}\nBy: {hook.User.DisplayName}\nEmail: {hook.User.EmailAddress}",
                 CreatedDate = hook.Issue.Fields.Created,
                 AreaPath = config.TfsConfig.Area,
                 TeamProject = config.TfsConfig.TeamProject,
@@ -67,7 +68,7 @@ namespace JFS.Controllers
                 TfsId = tfsResponse.Id,
                 Rev = tfsResponse.Rev,
                 Title = workItem.Title,
-                Description = workItem.ReproSteps
+                Description = JFStringer.ToCommonFormat(workItem.ReproSteps)
             };
 
             await _context.AddAsync(sync);
@@ -87,7 +88,7 @@ namespace JFS.Controllers
 
             if (config == null || sync == null || sync.Deleted || 
                 (sync.Title == hook.ChangeLog.Items.FirstOrDefault(ch => ch.Field == "summary")?.Tostring && 
-                 sync.Description == hook.ChangeLog.Items.FirstOrDefault(ch => ch.Field == "description")?.Tostring))
+                 sync.Description == JFStringer.ToCommonFormat(hook.ChangeLog.Items.FirstOrDefault(ch => ch.Field == "description")?.Tostring)))
                 return Ok($"Not found");
             // Update
             WorkItem workItem = new WorkItem();
@@ -97,7 +98,7 @@ namespace JFS.Controllers
                 switch (changelogItem.Field)
                 {
                     case "description":
-                        workItem.ReproSteps = changelogItem.Tostring;
+                        workItem.ReproSteps = JFStringer.ToTfsFormat(changelogItem.Tostring);
                         break;
                     case "summary":
                         workItem.Title = changelogItem.Tostring;

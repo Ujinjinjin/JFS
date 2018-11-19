@@ -7,6 +7,7 @@ using JFS.Models.Requests.TFS;
 using Atlassian.Jira;
 using System.Net;
 using JFS.Models.TFS.WorkItem;
+using JFS.Utils;
 
 namespace JFS.Controllers
 {
@@ -44,7 +45,7 @@ namespace JFS.Controllers
             issue.Type = hook.Resource.Fields.WorkItemType;
             issue.Priority = _context.Priority.First(p => p.TfsPriority == priority).JiraPriority;
             issue.Summary = hook.Resource.Fields.Title;
-            issue.Description = hook.Resource.Fields.ReproSteps;
+            issue.Description = JFStringer.ToCommonFormat(hook.Resource.Fields.ReproSteps);
 
             var result = await issue.SaveChangesAsync();
 
@@ -74,13 +75,15 @@ namespace JFS.Controllers
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.TfsId == hook.Resource.Revision.Id);
 
-            if (sync == null || sync.Deleted || config.TfsConfig.Priority != priority || (sync.Title == hook.Resource.Fields.Title?.NewValue && sync.Description == hook.Resource.Fields.ReproSteps?.NewValue))
+            if (sync == null || sync.Deleted || config.TfsConfig.Priority != priority || 
+                (sync.Title == hook.Resource.Fields.Title?.NewValue && 
+                 sync.Description == JFStringer.ToCommonFormat(hook.Resource.Fields.ReproSteps?.NewValue)))
                 return Ok($"Not found");
             // Update
             var issue = await _jira.Issues.GetIssueAsync(sync.JiraKey);
 
             issue.Summary = hook.Resource.Fields.Title != null ? hook.Resource.Fields.Title.NewValue : issue.Summary;
-            issue.Description = hook.Resource.Fields.ReproSteps != null ? hook.Resource.Fields.ReproSteps.NewValue : issue.Description;
+            issue.Description = hook.Resource.Fields.ReproSteps != null ? JFStringer.ToCommonFormat(hook.Resource.Fields.ReproSteps.NewValue) : issue.Description;
 
             sync.Rev = hook.Resource.Revision.Rev;
             sync.Title = issue.Summary;
