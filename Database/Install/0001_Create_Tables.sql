@@ -17,7 +17,7 @@ CREATE TABLE Sync (
     --     jira_descr TEXT    NOT NULL,
 
     title    TEXT    NOT NULL,
-    descr    TEXT    NOT NULL,
+    descr    TEXT,
 
     UNIQUE (jira_key, tfs_id)
         ON CONFLICT FAIL
@@ -41,9 +41,9 @@ CREATE TABLE JiraConfig (
 
 CREATE TABLE Config (
     id             INTEGER CONSTRAINT pk_config PRIMARY KEY AUTOINCREMENT,
-    tfs_config_id  INTEGER        NOT NULL REFERENCES TfsConfig (id),
-    jira_config_id INTEGER        NOT NULL REFERENCES JiraConfig (id),
-    profile_id     INTEGER UNIQUE NOT NULL REFERENCES Profile (id)
+    tfs_config_id  INTEGER NOT NULL REFERENCES TfsConfig (id),
+    jira_config_id INTEGER NOT NULL REFERENCES JiraConfig (id),
+    profile_id     INTEGER NOT NULL REFERENCES Profile (id)
 );
 
 CREATE INDEX idx_config__jira_config
