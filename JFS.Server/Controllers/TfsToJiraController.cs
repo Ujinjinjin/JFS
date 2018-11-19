@@ -31,21 +31,20 @@ namespace JFS.Controllers
         public async Task<IActionResult> Create([FromBody] TfsHook<Resource> hook)
         {
             // Get configs
-            Config config = Config.GetConfig(_context, 1);
-            //Get workItem
-            Resource workItem = await Clients.TfsClient.WorkItems.GetBug(config, hook.Resource.Id);
+            int priority = int.Parse(hook.Resource.Fields.Priority);
+            Config config = await Config.GetConfig(_context, priority);
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.TfsId == hook.Resource.Id);
 
-            if (config == null || sync != null || config.TfsConfig.Priority != int.Parse(workItem.Fields.Priority))
+            if (config == null || sync != null || config.TfsConfig.Priority != priority)
                 return Ok("Can't create issue");
 
 
             var issue = _jira.CreateIssue(config.JiraConfig.Project);
             issue.Type = hook.Resource.Fields.WorkItemType;
-            issue.Priority = _context.Priority.First(p => p.TfsPriority == int.Parse(workItem.Fields.Priority)).JiraPriority;
+            issue.Priority = _context.Priority.First(p => p.TfsPriority == priority).JiraPriority;
             issue.Summary = hook.Resource.Fields.Title;
-            issue.Description = workItem.Fields.ReproSteps;
+            issue.Description = hook.Resource.Fields.ReproSteps;
 
             var result = await issue.SaveChangesAsync();
 
@@ -55,27 +54,27 @@ namespace JFS.Controllers
                 JiraKey = result.Key.Value,
                 TfsId = hook.Resource.Id,
                 Rev = hook.Resource.Rev,
-                Title = hook.Resource.Fields.Title
+                Title = issue.Summary,
+                Description = issue.Description
             };
 
             await _context.AddAsync(sync);
             await _context.SaveChangesAsync();
 
-            return Ok(result);
+            return Ok("Created");
         }
 
         [HttpPost]
         [Route("issue/[action]")]
         public async Task<IActionResult> Update([FromBody] TfsHook<UpdatedResource> hook)
         {
+            int priority = int.Parse(hook.Resource.Revision.Fields.Priority);
             // Get configs
-            Config config = Config.GetConfig(_context, 1);
-            //Get workItem
-            Resource workItem = await Clients.TfsClient.WorkItems.GetBug(config, hook.Resource.Revision.Id);
+            Config config = await Config.GetConfig(_context, priority);
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.TfsId == hook.Resource.Revision.Id);
 
-            if (sync == null || sync.Deleted || (sync.Title == hook.Resource.Fields.Title.NewValue)) // || config.TfsConfig.Priority != 1)
+            if (sync == null || sync.Deleted || config.TfsConfig.Priority != priority || (sync.Title == hook.Resource.Fields.Title?.NewValue && sync.Description == hook.Resource.Fields.ReproSteps?.NewValue))
                 return Ok($"Not found");
             // Update
             var issue = await _jira.Issues.GetIssueAsync(sync.JiraKey);
@@ -83,14 +82,15 @@ namespace JFS.Controllers
             issue.Summary = hook.Resource.Fields.Title != null ? hook.Resource.Fields.Title.NewValue : issue.Summary;
             issue.Description = hook.Resource.Fields.ReproSteps != null ? hook.Resource.Fields.ReproSteps.NewValue : issue.Description;
 
-            var result = await issue.SaveChangesAsync();
-
             sync.Rev = hook.Resource.Revision.Rev;
-            sync.Title = hook.Resource.Fields.Title.NewValue;
+            sync.Title = issue.Summary;
+            sync.Description = issue.Description;
+
+            var result = await issue.SaveChangesAsync();
 
             await _context.SaveChangesAsync();
             
-            return Ok(result);
+            return Ok("Updated");
         }
 
         [HttpPost]

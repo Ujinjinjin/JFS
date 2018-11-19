@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+﻿using JFS.Clients.Constants;
 using JFS.Clients.TfsClient;
-using System.Collections.Generic;
-using JFS.Models.TFS.WorkItem;
-using JFS.Models.Jira;
 using JFS.Models.Db;
-using System.Linq;
-using JFS.Clients.Constants;
+using JFS.Models.Jira;
 using JFS.Models.Requests.TFS;
+using JFS.Models.TFS.WorkItem;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace JFS.Controllers
 {
@@ -31,7 +32,7 @@ namespace JFS.Controllers
         public async Task<IActionResult> Create([FromBody] JiraHook hook)
         {
             // Get configs
-            Config config = Config.GetConfig(_context, hook.Issue.Fields.Priority.Name);
+            Config config = await Config.GetConfig(_context, hook.Issue.Fields.Priority.Name);
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.JiraKey == hook.Issue.Key);
 
@@ -41,7 +42,7 @@ namespace JFS.Controllers
             WorkItem workItem = new WorkItem
             {
                 Title = hook.Issue.Fields.Summary,
-                ReproSteps = $"{hook.Issue.Fields.Description}\n \nOpend At: {hook.Issue.Fields.Created}\nBy: {hook.User.DisplayName}\nEmail: {hook.User.EmailAddress}",
+                ReproSteps = $"{hook.Issue.Fields.Description}", //\n \nOpend At: {hook.Issue.Fields.Created}\nBy: {hook.User.DisplayName}\nEmail: {hook.User.EmailAddress}",
                 CreatedDate = hook.Issue.Fields.Created,
                 AreaPath = config.TfsConfig.Area,
                 TeamProject = config.TfsConfig.TeamProject,
@@ -56,21 +57,23 @@ namespace JFS.Controllers
                     }
                 }
             };
-            var result = await WorkItems.CreateBug(workItem.ToParameterList(), config);  // TODO: Check if successeeded
+            var result = await WorkItems.CreateBug(workItem.ToParameterList(), config);  // TODO: Check if succeeded
 
-            Resource TfsResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Resource>(result);
+            Resource tfsResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Resource>(result);
             // Create new sync record
             sync = new Sync
             {
                 JiraKey = hook.Issue.Key,
-                TfsId = TfsResponse.Id,
-                Rev = TfsResponse.Rev
+                TfsId = tfsResponse.Id,
+                Rev = tfsResponse.Rev,
+                Title = workItem.Title,
+                Description = workItem.ReproSteps
             };
 
             await _context.AddAsync(sync);
             await _context.SaveChangesAsync();
 
-            return Ok(result);
+            return Ok("Created");
         }
 
         [HttpPost]
@@ -78,11 +81,13 @@ namespace JFS.Controllers
         public async Task<IActionResult> Update([FromBody] JiraHook hook)
         {
             // Get configs
-            Config config = Config.GetConfig(_context, hook.Issue.Fields.Priority.Name);
+            Config config = await Config.GetConfig(_context, hook.Issue.Fields.Priority.Name);
             // Validate
             Sync sync = _context.Sync.FirstOrDefault(s => s.JiraKey == hook.Issue.Key);
 
-            if (config == null || sync == null || sync.Deleted)
+            if (config == null || sync == null || sync.Deleted || 
+                (sync.Title == hook.ChangeLog.Items.FirstOrDefault(ch => ch.Field == "summary")?.Tostring && 
+                 sync.Description == hook.ChangeLog.Items.FirstOrDefault(ch => ch.Field == "description")?.Tostring))
                 return Ok($"Not found");
             // Update
             WorkItem workItem = new WorkItem();
@@ -100,14 +105,14 @@ namespace JFS.Controllers
                 }
             }
 
-            var result = await WorkItems.UpdateBug(workItem.ToParameterListNotEmptyFields(sync.Rev), config, sync.TfsId);  // TODO: Check if successeeded
+            var result = await WorkItems.UpdateBug(workItem.ToParameterListNotEmptyFields(sync.Rev), config, sync.TfsId);  // TODO: Check if succeeded
 
-            Resource TfsResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Resource>(result);
+            Resource tfsResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<Resource>(result);
 
-            sync.Rev = TfsResponse.Rev;
+            sync.Rev = tfsResponse.Rev;
             await _context.SaveChangesAsync();
 
-            return Ok(result);
+            return Ok("Updated");
         }
 
         [HttpPost]
