@@ -5,8 +5,6 @@ using System.Linq;
 using JFS.Clients.Constants;
 using JFS.Models.Requests.TFS;
 using Atlassian.Jira;
-using System.Net;
-using JFS.Models.TFS.WorkItem;
 using JFS.Utils;
 
 namespace JFS.Controllers
