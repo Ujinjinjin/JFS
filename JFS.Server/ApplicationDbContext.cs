@@ -59,6 +59,9 @@ namespace JFS
                 e.Property(s => s.TfsId).HasColumnName("tfs_id");
                 e.Property(s => s.Rev).HasColumnName("rev");
                 e.Property(s => s.Deleted).HasColumnName("deleted");
+                // Temporary
+                e.Property(s => s.Title).HasColumnName("title");
+                e.Property(s => s.Description).HasColumnName("descr");
             });
 
             modelBuilder.Entity<Priority>(e =>

@@ -27,7 +27,7 @@ namespace JFS.Models.TFS.WorkItem
                 {
                     op = "add",
                     path = "/fields/Microsoft.VSTS.TCM.ReproSteps", //"/fields/System.Description",
-                    value = $"<div>{ReproSteps.Replace("\n", "</div><div>")}</div>"
+                    value = $"{ReproSteps.Replace("\n", "<div></div>")}"
                 },
                 new WorkItemParameter
                 {

@@ -1,5 +1,5 @@
-﻿using JFS.Clients.Constants;
-using JFS.Models.Db;
+﻿using JFS.Models.Db;
+using JFS.Models.Requests.TFS;
 using JFS.Models.TFS.WorkItem;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -23,6 +23,16 @@ namespace JFS.Clients.TfsClient
             HttpResponseMessage response = await _client.PatchAsync($"{config.TfsConfig.TeamProject}/_apis/wit/workitems/{id}", "api-version=4.1", parameters);
             string responseBody = await response.Content.ReadAsStringAsync();
             return responseBody;
+        }
+
+        public static async Task<Resource> GetBug(Config config, int id)
+        {
+            HttpResponseMessage response = await _client.GetAsync($"{config.TfsConfig.TeamProject}/_apis/wit/workitems/{id}", "api-version=4.1");
+            string responseBody = await response.Content.ReadAsStringAsync();
+
+            Resource wi = Newtonsoft.Json.JsonConvert.DeserializeObject<Resource>(responseBody);
+
+            return wi;
         }
     }
 }
